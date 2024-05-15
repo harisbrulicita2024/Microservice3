@@ -19,7 +19,7 @@ public class TrackingResourceTest {
         RestAssured.given()
                 .when().get("/{tracking_id}", 1)
                 .then()
-                .statusCode(500)
+                .statusCode(200)
                 .body("tracking_id", equalTo(1));
     }
 
@@ -33,8 +33,7 @@ public class TrackingResourceTest {
                 .body(tracking)
                 .when().post()
                 .then()
-                .statusCode(500)
+                .statusCode(200)
                 .body("tracking_id", equalTo(tracking.getTracking_id()));
     }
 }
-

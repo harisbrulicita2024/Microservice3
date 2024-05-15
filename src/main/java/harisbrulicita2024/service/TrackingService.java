@@ -2,13 +2,17 @@ package harisbrulicita2024.service;
 
 import harisbrulicita2024.model.Tracking;
 import harisbrulicita2024.repository.TrackingRepository;
+import io.quarkus.hibernate.reactive.panache.Panache;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import io.quarkus.hibernate.reactive.panache.common.WithSession;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
+import jakarta.transaction.Transactional;
 
 import java.util.List;
+
+import static io.quarkus.hibernate.reactive.panache.PanacheEntityBase.persist;
 
 @ApplicationScoped
 public class TrackingService {
@@ -16,6 +20,12 @@ public class TrackingService {
     @Inject
     TrackingRepository trackingRepository;
 
+    @Transactional
+    public Uni<Tracking> createTracking(Tracking tracking) {
+        return Panache.withTransaction(() -> persist(tracking))
+                .onItem().transform(inserted -> tracking)
+                .onFailure().invoke(Throwable::printStackTrace);
+    }
     @WithSession
     public Uni<List<Tracking>> findAll() {
         return trackingRepository.listAll();
