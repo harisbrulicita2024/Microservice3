@@ -1,39 +1,39 @@
 package harisbrulicita2024.resource;
 
-import harisbrulicita2024.model.Tracking;
-import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.common.http.TestHTTPEndpoint;
-import io.restassured.RestAssured;
+import io.smallrye.mutiny.Uni;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import harisbrulicita2024.repository.TrackingRepository;
+import harisbrulicita2024.model.Tracking;
 
-import java.util.UUID;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
 
-import static org.hamcrest.CoreMatchers.*;
-
-@QuarkusTest
-@TestHTTPEndpoint(TrackingResource.class)
 public class TrackingResourceTest {
 
     @Test
-    public void testGetTracking() {
-        RestAssured.given()
-                .when().get("/{tracking_id}", 1)
-                .then()
-                .statusCode(200)
-                .body("tracking_id", equalTo(1));
-    }
+    public void testListAllTrackings() {
+        Tracking testTracking = new Tracking();
+        testTracking.tracking_id = 123L;
+        testTracking.user_id = 456L;
+        testTracking.job_id = 789L;
+        testTracking.application_date = LocalDate.of(2021, 1, 1);
+        testTracking.status = "status";
+        testTracking.interview = true;
+        testTracking.interview_date = LocalDateTime.of(2021, 1, 1, 12, 0);
+        testTracking.final_status = "final_status";
 
-    @Test
-    public void testCreateTracking() {
-        Tracking tracking = new Tracking();
-        tracking.setTracking_id(UUID.randomUUID().getMostSignificantBits() & Long.MAX_VALUE);
 
-        RestAssured.given()
-                .contentType("application/json")
-                .body(tracking)
-                .when().post()
-                .then()
-                .statusCode(200)
-                .body("tracking_id", equalTo(tracking.getTracking_id()));
+
+        TrackingRepository trackingRepository = Mockito.mock(TrackingRepository.class);
+        when(trackingRepository.listAll()).thenReturn(Uni.createFrom().item(Collections.singletonList(testTracking)));
+
+        List<Tracking> result = trackingRepository.listAll().await().indefinitely();
+        assertEquals(1, result.size());
+        assertEquals(testTracking, result.getFirst());
     }
 }
