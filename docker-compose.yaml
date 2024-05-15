@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgresdb3
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: jobsportal
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: haris123
+    ports:
+      - "5432:5432"
+    networks:
+      - backend
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  microservice3:
+    build:
+      context: .
+      dockerfile: src/main/docker/Dockerfile.jvm
+    container_name: microservice3
+    depends_on:
+      - postgres
+    ports:
+      - "9850:9850"
+    networks:
+      - backend
+    environment:
+      - QUARKUS_DATASOURCE_REACTIVE_URL=postgresql://postgres:5432/jobsportal
+      - QUARKUS_DATASOURCE_USERNAME=postgres
+      - QUARKUS_DATASOURCE_PASSWORD=haris123
+      - QUARKUS_HIBERNATE_ORM_DATABASE_GENERATION=update
+
+networks:
+  backend:
+    driver: bridge
