@@ -27,7 +27,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           java-version: '21'
-          distribution: 'temurin' # This specifies the distribution of Java to use.
+          distribution: 'temurin'
 
       - name: Cache Maven packages
         uses: actions/cache@v2
